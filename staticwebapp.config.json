@@ -14,18 +14,10 @@
     },
     {
       "route": "/*",
-      "allowedRoles": ["authenticated"],
-      "statusCode": 401
+      "allowedRoles": ["authenticated"]
     }
   ],
-  "responseOverrides": {
-    "401": {
-      "redirect": "/",
-      "statusCode": 200
-    }
-  },
   "navigationFallback": {
-    "rewrite": "/index.html",
-    "exclude": ["/.auth/*", "/api/*"]
+    "rewrite": "/index.html"
   }
 }
