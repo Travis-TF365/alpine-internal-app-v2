@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Alpine.js App</title>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.13.3/cdn.min.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .login-container {
+            text-align: center;
+            padding: 3rem 2rem;
+        }
+        .login-container h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .login-container p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        button {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin: 0.5rem;
+            font-size: 1rem;
+            text-decoration: none;
+            display: inline-block;
+        }
+        button:hover, .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+        .login-btn {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin: 0.5rem;
+            font-size: 1.1rem;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .logout-btn {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            float: right;
+            padding: 8px 16px;
+            font-size: 0.9rem;
+        }
+        .user-info {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+        }
+        input {
+            padding: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 1rem;
+            margin: 0.5rem;
+            width: 200px;
+        }
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        .counter {
+            text-align: center;
+            font-size: 2rem;
+            margin: 1rem 0;
+        }
+        .task-list {
+            list-style: none;
+            padding: 0;
+        }
+        .task-item {
+            background: rgba(255, 255, 255, 0.1);
+            margin: 0.5rem 0;
+            padding: 1rem;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .delete-btn {
+            background: #e74c3c;
+            padding: 8px 16px;
+            font-size: 0.9rem;
+        }
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body x-data="authApp()" x-init="checkAuth()">
+    <div class="container">
+        <!-- Loading State -->
+        <div x-show="loading" class="loading">
+            <h2>🔐 Checking authentication...</h2>
+            <p>Please wait while we verify your access.</p>
+        </div>
+
+        <!-- Login Required State -->
+        <div x-show="!loading && !user" class="login-container">
+            <h1>🔒 Internal Access Required</h1>
+            <p>Please log in with your Microsoft account to access this internal application</p>
+            <a href="/.auth/login/aad" class="login-btn">Login with Microsoft Account</a>
+            
+            <div class="card" style="margin-top: 2rem;">
+                <h3>Welcome to Our Secure App</h3>
+                <p>This is a protected application built with Alpine.js and deployed on Azure Static Web Apps. To access the full functionality, you'll need to authenticate using your Microsoft account.</p>
+                <h4>Features you'll get access to:</h4>
+                <ul style="text-align: left; max-width: 400px; margin: 0 auto;">
+                    <li>✨ Interactive counter with state management</li>
+                    <li>📝 Personal todo list functionality</li>
+                    <li>🎨 Dynamic content manipulation</li>
+                    <li>🔒 Secure, personalized experience</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Authenticated App State -->
+        <div x-show="!loading && user">
+            <!-- User Info Bar -->
+            <div class="user-info">
+                <span>👋 Welcome, <strong x-text="user?.userDetails || 'User'"></strong>!</span>
+                <a href="/.auth/logout" class="logout-btn">Logout</a>
+                <div style="clear: both;"></div>
+            </div>
+
+            <h1>🚀 Alpine.js Demo App</h1>
+            
+            <!-- Counter Component -->
+            <div class="card" x-data="{ count: 0 }">
+                <h2>Counter</h2>
+                <div class="counter" x-text="count"></div>
+                <button @click="count++">Increment</button>
+                <button @click="count--">Decrement</button>
+                <button @click="count = 0">Reset</button>
+            </div>
+
+            <!-- Todo List Component -->
+            <div class="card" x-data="todoApp()">
+                <h2>Todo List</h2>
+                <div>
+                    <input 
+                        type="text" 
+                        x-model="newTask" 
+                        @keyup.enter="addTask()" 
+                        placeholder="Enter a new task...">
+                    <button @click="addTask()">Add Task</button>
+                </div>
+                
+                <ul class="task-list">
+                    <template x-for="(task, index) in tasks" :key="index">
+                        <li class="task-item">
+                            <span x-text="task"></span>
+                            <button class="delete-btn" @click="removeTask(index)">Delete</button>
+                        </li>
+                    </template>
+                </ul>
+                <p x-show="tasks.length === 0" style="text-align: center; opacity: 0.7;">
+                    No tasks yet. Add one above! ✨
+                </p>
+            </div>
+
+            <!-- Dynamic Content -->
+            <div class="card" x-data="{ message: 'Hello, Alpine.js!', show: true }">
+                <h2>Dynamic Content</h2>
+                <div x-show="show" x-transition>
+                    <p x-text="message"></p>
+                </div>
+                <input type="text" x-model="message" placeholder="Change the message...">
+                <button @click="show = !show" x-text="show ? 'Hide' : 'Show'"></button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function authApp() {
+            return {
+                user: null,
+                loading: true,
+                
+                async checkAuth() {
+                    try {
+                        const response = await fetch('/.auth/me');
+                        const authData = await response.json();
+                        
+                        if (authData.clientPrincipal) {
+                            this.user = authData.clientPrincipal;
+                        }
+                    } catch (error) {
+                        console.log('Not authenticated or error checking auth:', error);
+                    } finally {
+                        this.loading = false;
+                    }
+                }
+            }
+        }
+
+        function todoApp() {
+            return {
+                newTask: '',
+                tasks: ['Learn Alpine.js', 'Deploy to Azure', 'Build something awesome!'],
+                
+                addTask() {
+                    if (this.newTask.trim() !== '') {
+                        this.tasks.push(this.newTask.trim());
+                        this.newTask = '';
+                    }
+                },
+                
+                removeTask(index) {
+                    this.tasks.splice(index, 1);
+                }
+            }
+        }
+    </script>
+</body>
+</html>
