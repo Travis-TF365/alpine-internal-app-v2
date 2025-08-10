@@ -1,22 +1,4 @@
 {
-  "routes": [
-    {
-      "route": "/.auth/login/aad",
-      "allowedRoles": ["anonymous"]
-    },
-    {
-      "route": "/.auth/logout",
-      "allowedRoles": ["authenticated"]
-    },
-    {
-      "route": "/.auth/me",
-      "allowedRoles": ["anonymous"]
-    },
-    {
-      "route": "/*",
-      "allowedRoles": ["authenticated"]
-    }
-  ],
   "navigationFallback": {
     "rewrite": "/index.html"
   }
