@@ -147,14 +147,14 @@
 
         <!-- Login Required State -->
         <div x-show="!loading && !user" class="login-container">
-            <h1>🔒 Internal Access Required</h1>
-            <p>Please log in with your Microsoft account to access this internal application</p>
+            <h1>🔒 Access Required</h1>
+            <p>Please log in with your Microsoft account to access this application</p>
             <a href="/.auth/login/aad" class="login-btn">Login with Microsoft Account</a>
             
             <div class="card" style="margin-top: 2rem;">
-                <h3>Welcome to Our Secure App</h3>
-                <p>This is a protected application built with Alpine.js and deployed on Azure Static Web Apps. To access the full functionality, you'll need to authenticate using your Microsoft account.</p>
-                <h4>Features you'll get access to:</h4>
+                <h3>Welcome to Our App</h3>
+                <p>This is a protected application built with Alpine.js and deployed on Azure Static Web Apps. Please authenticate to continue.</p>
+                <h4>Features available after login:</h4>
                 <ul style="text-align: left; max-width: 400px; margin: 0 auto;">
                     <li>✨ Interactive counter with state management</li>
                     <li>📝 Personal todo list functionality</li>
@@ -164,11 +164,28 @@
             </div>
         </div>
 
-        <!-- Authenticated App State -->
-        <div x-show="!loading && user">
+        <!-- External User Access Denied -->
+        <div x-show="!loading && user && !isInternalUser" class="login-container">
+            <h1>🚫 Access Restricted</h1>
+            <p>This application is restricted to TechForge365 employees only.</p>
+            <div class="card" style="margin-top: 2rem;">
+                <h3>External Access Detected</h3>
+                <p>We've detected that you're logged in with an external Microsoft account:</p>
+                <p><strong x-text="user?.userDetails"></strong></p>
+                <p>This application is only available to users with @techforge365.com email addresses.</p>
+                <p>If you believe this is an error, please contact your system administrator.</p>
+                <a href="/.auth/logout" class="login-btn">Logout and Try Different Account</a>
+            </div>
+        </div>
+
+        <!-- Authenticated Internal User App State -->
+        <div x-show="!loading && user && isInternalUser">
             <!-- User Info Bar -->
             <div class="user-info">
                 <span>👋 Welcome, <strong x-text="user?.userDetails || 'User'"></strong>!</span>
+                <span style="margin-left: 1rem; background: rgba(76, 175, 80, 0.3); padding: 4px 12px; border-radius: 15px; font-size: 0.9rem;">
+                    🏢 TechForge365 Employee
+                </span>
                 <a href="/.auth/logout" class="logout-btn">Logout</a>
                 <div style="clear: both;"></div>
             </div>
@@ -226,6 +243,7 @@
             return {
                 user: null,
                 loading: true,
+                isInternalUser: false,
                 
                 async checkAuth() {
                     try {
@@ -234,6 +252,13 @@
                         
                         if (authData.clientPrincipal) {
                             this.user = authData.clientPrincipal;
+                            
+                            // Check if user has @techforge365.com email
+                            const userEmail = authData.clientPrincipal.userDetails || '';
+                            this.isInternalUser = userEmail.toLowerCase().endsWith('@techforge365.com');
+                            
+                            console.log('User email:', userEmail);
+                            console.log('Is internal user:', this.isInternalUser);
                         }
                     } catch (error) {
                         console.log('Not authenticated or error checking auth:', error);
